@@ -38,9 +38,11 @@ async def install_ros_packages(mount_point):
         ]
         print(packages, existing_packages)
         new_packages = [
-            package for package in packages if package not in existing_packages or True
+            package for package in packages if package not in existing_packages
         ]
         print(new_packages)
+        if len(new_packages) < 1:
+            return
         for package in new_packages:
             try:
                 os.symlink(
@@ -69,7 +71,7 @@ def rosdep_install(packages):
     if not internet_on():
         return
     ret = subprocess.run(
-        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && cd ../src/ && (sudo -H -u mirte bash -c \\\"rosdep update\\\" || true) && rosdep install --from-paths $(pwd) --ignore-src -y -r -v"',
+        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && cd ../src/ && (sudo -H -u mirte bash -c \\"rosdep update\\" || true) && rosdep install --from-paths $(pwd) --ignore-src -y -r -v"',
         # f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && cd ../src/ && rosdep install {package} -r -s -i --rosdistro=$ROS_DISTRO"',
         capture_output=False,
         shell=True,
