@@ -1,0 +1,8 @@
+[Unit]
+Description=Mirte provisioning service
+After=multi-user.target
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/src/mirte/mirte-install-scripts/provisioning/provisioning.py
+[Install]
+WantedBy=multi-user.target
