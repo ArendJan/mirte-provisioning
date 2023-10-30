@@ -5,6 +5,7 @@ import yaml
 import subprocess
 import signal
 import time
+import asyncio
 
 processes = []
 
@@ -51,6 +52,7 @@ async def install_ros_packages(mount_point):
                 )
             except Exception as e:
                 print("symlink err:", e)
+        await asyncio.sleep(20) # give the machine_config component time to connect to a nice network!
         rosdep_install(new_packages)
     except Exception as e:
         print(e)
