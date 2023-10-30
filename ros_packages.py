@@ -56,8 +56,8 @@ async def install_ros_packages(mount_point):
 
 def get_ws_folder():
     ret = subprocess.run(
-        # f'/bin/bash -c ". /home/mirte/.bashrc && roscd && pwd"',
-        f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && pwd"',
+        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && pwd"',
+        # f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && pwd"',
         capture_output=True,
         shell=True,
     )
@@ -68,18 +68,12 @@ def get_ws_folder():
 def rosdep_install(packages):
     if not internet_on():
         return
-    for package in packages:
-        install_package(package)
-
-
-def install_package(package):
     ret = subprocess.run(
-        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && cd ../src/ && rosdep install {package} -r -v -i --rosdistro=$ROS_DISTRO"',
+        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && cd ../src/ && (sudo -H -u mirte bash -c \\\"rosdep update\\\" || true) && rosdep install --from-paths $(pwd) --ignore-src -y -r -v"',
         # f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && cd ../src/ && rosdep install {package} -r -s -i --rosdistro=$ROS_DISTRO"',
-        capture_output=True,
+        capture_output=False,
         shell=True,
     )
-    print(ret.stdout.decode(), ret.stderr.decode(), ret)
 
 
 from urllib.request import urlopen
