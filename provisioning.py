@@ -64,6 +64,9 @@ def main():
     event_loop.add_signal_handler(signal.SIGINT,
                         functools.partial(asyncio.ensure_future,
                                           shutdown()))
+    event_loop.add_signal_handler(signal.SIGTERM,
+                        functools.partial(asyncio.ensure_future,
+                                          shutdown()))
 
     start_modules(mount_point, modules, event_loop)
     event_loop.run_until_complete(main_loop())
