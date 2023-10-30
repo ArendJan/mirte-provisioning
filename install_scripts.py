@@ -3,19 +3,31 @@ import os
 import hashlib
 import yaml
 import subprocess
+import signal
+import time
 
-
+processes = []
 def start(mount_point, loop):
     loop.create_task(install_scripts(mount_point, loop))
     pass
 
 
 def stop():
+    for proc in processes: # kill all started scripts
+        if proc.poll() is None:
+            proc.send_signal(signal.SIGINT)
+            start_time = time.time()
+            while(proc.poll() is None and time.time()-start_time < 10):
+                time.sleep(0.2)
+            if proc.poll() is None:
+                proc.terminate()
+        print("stopped ", proc.args[1])
+
     print("stop install_scripts")
 
 
 async def install_scripts(mount_point, loop):
-    # run all scripts if not yet ran, but if ends with _always, then start it always
+    # run all scripts if not yet ran(checked by sha256sum check), but if ends with _always, then start it always
     scripts_folder = os.path.join(mount_point, "scripts")
     print(scripts_folder)
     if not os.path.isdir(scripts_folder):
@@ -92,4 +104,9 @@ def start_always_scripts(loop, always_scripts):
 
 
 async def start_script(script_name):
-    print("start", script_name)
+    global processes
+    # FAT filesystems don't have the executable flag, so directly running it won't work, so just start them with bash
+    # also start them in the background
+    proc = subprocess.Popen(['/bin/bash', script_name])
+    processes.append(proc)
+

@@ -2,7 +2,9 @@
 import time
 import asyncio
 import traceback
-
+import signal
+import sys
+import functools
 # Provisioning system for the Mirte sd cards.
 # Only activate this service when you want to copy configurations from the second partition to the operating system
 
@@ -15,33 +17,56 @@ import ssh
 import install_scripts
 
 modules = [install_scripts]
-
+stopped = False
 event_loop = asyncio.get_event_loop()
 
-for module in modules:
-    try:
-        module.start(mount_point, event_loop)
-    except Exception as e:
-        print(e)
-        print(traceback.format_exc())
+def start_modules(mount_point, modules, event_loop):
+    for module in modules:
+        try:
+            module.start(mount_point, event_loop)
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
 
 
-async def main():
-    count = 1000
-    while True:
-        count += -1
-        await asyncio.sleep(1)
+
+async def main_loop():
+    global stopped
+    while not stopped:
+        await asyncio.sleep(0.5)
+    print("stopped main")
+
+def stop_all():
+    global stopped
+    stopped = True
+    time.sleep(1)
+    stop_modules(modules)
+
+    pending = asyncio.all_tasks(loop=event_loop)
+    event_loop.run_until_complete(asyncio.gather(*pending))
+    event_loop.close()
 
 
-event_loop.run_until_complete(main())
+def stop_modules(modules):
+    for module in modules:
+        try:
+            module.stop()
+        except Exception as e:
+            print(e)
 
+async def shutdown():
+    global stopped
+    stopped = True
+    await asyncio.sleep(1)
+    
 
-for module in modules:
-    try:
-        module.stop()
-    except Exception as e:
-        print(e)
+def main():
+    event_loop.add_signal_handler(signal.SIGINT,
+                        functools.partial(asyncio.ensure_future,
+                                          shutdown()))
 
-pending = asyncio.all_tasks(loop=event_loop)
-event_loop.run_until_complete(asyncio.gather(*pending))
-event_loop.close()
+    start_modules(mount_point, modules, event_loop)
+    event_loop.run_until_complete(main_loop())
+    stop_all()
+if __name__ == "__main__":
+    main()
