@@ -71,7 +71,7 @@ def rosdep_install(packages):
     if not internet_on():
         return
     ret = subprocess.run(
-        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && cd ../src/ && (sudo -H -u mirte bash -c \\"rosdep update\\" || true) && rosdep install --from-paths $(pwd) --ignore-src -y -r -v"',
+        "/bin/bash -c '. /home/mirte/.bashrc && roscd && cd ../src/ && p=$(pwd); rosdep install --from-paths $p --ignore-src -y -r -v'",
         # f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && cd ../src/ && rosdep install {package} -r -s -i --rosdistro=$ROS_DISTRO"',
         capture_output=False,
         shell=True,
@@ -79,7 +79,6 @@ def rosdep_install(packages):
 
 
 from urllib.request import urlopen
-
 
 def internet_on():
     try:
