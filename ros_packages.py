@@ -6,6 +6,7 @@ import subprocess
 import signal
 import time
 import asyncio
+from urllib.request import urlopen
 
 processes = []
 
@@ -52,7 +53,8 @@ async def install_ros_packages(mount_point):
                 )
             except Exception as e:
                 print("symlink err:", e)
-        await asyncio.sleep(20) # give the machine_config component time to connect to a nice network!
+        # give the machine_config component time to connect to a nice network!
+        await asyncio.sleep(20)
         rosdep_install(new_packages)
     except Exception as e:
         print(e)
@@ -80,11 +82,9 @@ def rosdep_install(packages):
     )
 
 
-from urllib.request import urlopen
-
 def internet_on():
     try:
-        response = urlopen("https://mirte.org/", timeout=2)
+        urlopen("https://mirte.org/", timeout=2)
         return True
     except:
         return False
