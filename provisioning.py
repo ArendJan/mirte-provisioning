@@ -8,12 +8,13 @@ import traceback
 
 # assume mounting point is /mnt/mirte, otherwise change it here to somewhere to let the modules take out the required info
 mount_point = "/mnt/mirte/"
-
+mount_point = "/home/arendjan/mirte-provisioning/default_config/"
 import robot_config
 import machine_config
 import ssh
+import install_scripts
 
-modules = [robot_config, machine_config, ssh]
+modules = [install_scripts]
 
 event_loop = asyncio.get_event_loop()
 

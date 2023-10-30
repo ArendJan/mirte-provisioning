@@ -40,7 +40,7 @@ def copy_on_modify(src_path):
     last_copy = time.time()
     if src_path == tmx_config_path:
         copy(src_path, sd_config_path)
-    else:
+    else:  # TODO: restart telemetrix node
         copy(src_path, tmx_config_path)
 
 
