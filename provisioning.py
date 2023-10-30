@@ -18,7 +18,7 @@ import ssh
 import install_scripts
 import ros_packages
 
-modules = [ros_packages, install_scripts, ssh, machine_config, robot_config]
+modules = [ros_packages]
 stopped = False
 event_loop = asyncio.get_event_loop()
 

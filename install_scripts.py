@@ -10,7 +10,7 @@ processes = []
 
 
 def start(mount_point, loop):
-    loop.create_task(install_scripts(mount_point, loop))
+    loop.create_task(install_scripts(mount_point))
 
 
 def stop():

@@ -38,24 +38,56 @@ async def install_ros_packages(mount_point):
         ]
         print(packages, existing_packages)
         new_packages = [
-            package for package in packages if package not in existing_packages
+            package for package in packages if package not in existing_packages or True
         ]
         print(new_packages)
         for package in new_packages:
-            os.symlink(
-                os.path.join(packages_folder, package),
-                os.path.join(target_ws_folder, package),
-            )
+            try:
+                os.symlink(
+                    os.path.join(packages_folder, package),
+                    os.path.join(target_ws_folder, package),
+                )
+            except Exception as e:
+                print("symlink err:", e)
+        rosdep_install(new_packages)
     except Exception as e:
         print(e)
 
 
 def get_ws_folder():
     ret = subprocess.run(
-        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && pwd"',
-        # f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && pwd"',
+        # f'/bin/bash -c ". /home/mirte/.bashrc && roscd && pwd"',
+        f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && pwd"',
         capture_output=True,
         shell=True,
     )
     print(ret.stdout.decode(), ret.stderr.decode())
     return os.path.abspath(os.path.join(ret.stdout.decode(), "../src"))
+
+
+def rosdep_install(packages):
+    if not internet_on():
+        return
+    for package in packages:
+        install_package(package)
+
+
+def install_package(package):
+    ret = subprocess.run(
+        f'/bin/bash -c ". /home/mirte/.bashrc && roscd && cd ../src/ && rosdep install {package} -r -v -i --rosdistro=$ROS_DISTRO"',
+        # f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && cd ../src/ && rosdep install {package} -r -s -i --rosdistro=$ROS_DISTRO"',
+        capture_output=True,
+        shell=True,
+    )
+    print(ret.stdout.decode(), ret.stderr.decode(), ret)
+
+
+from urllib.request import urlopen
+
+
+def internet_on():
+    try:
+        response = urlopen("https://mirte.org/", timeout=2)
+        return True
+    except:
+        return False
