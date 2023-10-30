@@ -4,5 +4,6 @@ After=multi-user.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/python3 /usr/local/src/mirte/mirte-install-scripts/provisioning/provisioning.py
+killMode=mixed
 [Install]
 WantedBy=multi-user.target

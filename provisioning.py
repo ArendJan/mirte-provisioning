@@ -5,6 +5,7 @@ import traceback
 import signal
 import sys
 import functools
+
 # Provisioning system for the Mirte sd cards.
 # Only activate this service when you want to copy configurations from the second partition to the operating system
 
@@ -16,9 +17,10 @@ import machine_config
 import ssh
 import install_scripts
 
-modules = [install_scripts]
+modules = [install_scripts, ssh, machine_config, robot_config]
 stopped = False
 event_loop = asyncio.get_event_loop()
+
 
 def start_modules(mount_point, modules, event_loop):
     for module in modules:
@@ -29,12 +31,12 @@ def start_modules(mount_point, modules, event_loop):
             print(traceback.format_exc())
 
 
-
 async def main_loop():
     global stopped
     while not stopped:
         await asyncio.sleep(0.5)
     print("stopped main")
+
 
 def stop_all():
     global stopped
@@ -54,22 +56,25 @@ def stop_modules(modules):
         except Exception as e:
             print(e)
 
+
 async def shutdown():
     global stopped
     stopped = True
     await asyncio.sleep(1)
-    
+
 
 def main():
-    event_loop.add_signal_handler(signal.SIGINT,
-                        functools.partial(asyncio.ensure_future,
-                                          shutdown()))
-    event_loop.add_signal_handler(signal.SIGTERM,
-                        functools.partial(asyncio.ensure_future,
-                                          shutdown()))
+    event_loop.add_signal_handler(
+        signal.SIGINT, functools.partial(asyncio.ensure_future, shutdown())
+    )
+    event_loop.add_signal_handler(
+        signal.SIGTERM, functools.partial(asyncio.ensure_future, shutdown())
+    )
 
     start_modules(mount_point, modules, event_loop)
     event_loop.run_until_complete(main_loop())
     stop_all()
+
+
 if __name__ == "__main__":
     main()
