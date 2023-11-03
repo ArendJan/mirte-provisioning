@@ -1,6 +1,5 @@
 import yaml
 import os
-from deepdiff import DeepDiff
 import nmcli
 import asyncio
 
