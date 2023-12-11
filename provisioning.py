@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-import ros_packages
-import install_scripts
-import ssh
-import machine_config
-import robot_config
+
 import time
 import asyncio
 import traceback
 import signal
-import sys
 import functools
 from asyncio.events import AbstractEventLoop
-from typing import Any, Dict, List
-import module
+from typing import List
+
+from provisioning_module import ProvisioningModule
+from install_scripts import InstallScripts
+from ssh import SshConfig
+from machine_config import MachineConfig
+from robot_config import RobotConfig
 # Provisioning system for the Mirte sd cards.
 # Only activate this service when you want to copy configurations from the
 # second partition to the operating system
@@ -22,12 +22,12 @@ import module
 MOUNT_POINT = "/mnt/mirte/"
 # mount_point = "/home/arendjan/mirte-provisioning/default_config/"
 
-USED_MODULES = [ros_packages]
+USED_MODULES = [ProvisioningModule(), InstallScripts(),SshConfig(), MachineConfig(), RobotConfig()]
 stopped = False
 event_loop = asyncio.get_event_loop()
 
 
-def start_modules(mount_point:str, modules: List[Module], event_loop: AbstractEventLoop)-> None:
+def start_modules(mount_point:str, modules: List[ProvisioningModule], event_loop: AbstractEventLoop)-> None:
     for module in modules:
         try:
             module.start(mount_point, event_loop)
@@ -36,8 +36,7 @@ def start_modules(mount_point:str, modules: List[Module], event_loop: AbstractEv
             print(traceback.format_exc())
 
 
-async def main_loop():
-    global stopped
+async def main_loop()-> None:
     while not stopped:
         await asyncio.sleep(0.5)
     print("stopped main")
@@ -54,7 +53,7 @@ def stop_all()-> None:
     event_loop.close()
 
 
-def stop_modules(modules:List[Module(str)])-> None:
+def stop_modules(modules:List[ProvisioningModule])-> None:
     for module in modules:
         try:
             module.stop()
