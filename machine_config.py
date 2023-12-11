@@ -2,6 +2,8 @@ import yaml
 import os
 import nmcli
 import asyncio
+from asyncio.events import AbstractEventLoop
+from typing import Any, Dict
 
 prev_config_file = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "store/machine_config.yaml"
@@ -11,7 +13,7 @@ print(prev_config_file)
 hostname = "Mirte-XXXXX"
 
 
-def start(mount_point, loop):
+def start(mount_point: str, loop: AbstractEventLoop) -> None:
     config_file = f"{mount_point}/machine_config.yaml"
     if not os.path.isfile(config_file):
         print("No machine_config configuration, stopping config provisioning")
@@ -37,7 +39,7 @@ def start(mount_point, loop):
     store_prev_config(configuration, prev_config_file)
 
 
-def access_points(configuration, loop):
+def access_points(configuration: Dict[str, Any], loop: AbstractEventLoop) -> None:
     print(configuration)
     try:
         for ap in configuration["access_points"]:
@@ -51,19 +53,19 @@ def access_points(configuration, loop):
 stopped = False
 
 
-def stop():
+def stop() -> None:
     global stopped
     stopped = True
 
 
 # Nmcli can only connect to a network that is in the air, so we need to continuously check available networks and if not connected, try any known connections
-async def ap_loop(configuration):
+async def ap_loop(configuration: Dict[str, Any]) -> None:
     while not stopped:
         await asyncio.sleep(10)
         await check_ap(configuration)
 
 
-async def check_ap(configuration):
+async def check_ap(configuration: Dict[str, Any]) -> None:
     connections = nmcli.connection()
     wifi_conn = list(
         filter(
@@ -76,9 +78,7 @@ async def check_ap(configuration):
             print("existing wifi connection")
             return
     # No connection or own hotspot
-    aps = nmcli.device.wifi()
-    aps = list(map(lambda ap: ap.ssid, aps))
-    # known_aps = list(map(lambda ap: ap.ssid, ))
+    aps = list(map(lambda ap: ap.ssid, nmcli.device.wifi()))
     existing_known_aps = list(
         filter(lambda known_ap: known_ap["ssid"] in aps, configuration["access_points"])
     )
@@ -89,7 +89,7 @@ async def check_ap(configuration):
         nmcli.device.wifi_connect(ap["ssid"], ap["password"])
 
 
-def set_hostname(new_hostname, curr_set_hostname):
+def set_hostname(new_hostname: str, curr_set_hostname: str) -> None:
     global hostname
     if new_hostname == curr_set_hostname:
         return
@@ -104,7 +104,7 @@ def set_hostname(new_hostname, curr_set_hostname):
         hostname = new_hostname
 
 
-def set_password(new_password, prev_set_password):
+def set_password(new_password: str, prev_set_password: str) -> None:
     if new_password == prev_set_password:
         # No need to update it and possibly the user edited it already by using the passwd command
         return
@@ -118,7 +118,7 @@ def set_password(new_password, prev_set_password):
     print(o)
 
 
-def write_back_configuration(configuration, config_file):
+def write_back_configuration(configuration: dict, config_file: str) -> None:
     # read back in the hostname file, if not set in this run, then the user can know the hostname after a first boot
     with open("/etc/hostname", "r") as file:
         current_name = file.readlines()[0].strip()
@@ -130,7 +130,7 @@ def write_back_configuration(configuration, config_file):
         file.writelines(config_text)
 
 
-def store_prev_config(configuration, prev_config_file):
+def store_prev_config(configuration: Dict[str, Any], prev_config_file: str) -> None:
     config_text = yaml.dump(configuration)
     with open(prev_config_file, "w") as file:
         file.writelines(config_text)

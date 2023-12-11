@@ -58,7 +58,7 @@ def stop_modules(modules):
             print(e)
 
 
-async def shutdown():
+async def shutdown() -> None:
     global stopped
     stopped = True
     await asyncio.sleep(1)

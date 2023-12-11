@@ -5,15 +5,17 @@ import yaml
 import subprocess
 import signal
 import time
+from asyncio.events import AbstractEventLoop
+from typing import Any, Dict, List
 
 processes = []
 
 
-def start(mount_point, loop):
+def start(mount_point: str, loop: AbstractEventLoop) -> None:
     loop.create_task(install_scripts(mount_point))
 
 
-def stop():
+def stop() -> None:
     for (
         proc
     ) in (
@@ -33,7 +35,7 @@ def stop():
     print("stop install_scripts")
 
 
-async def install_scripts(mount_point):
+async def install_scripts(mount_point: str) -> None:
     # run all scripts if not yet ran(checked by sha256sum check), but if ends with _always, then start it always
     try:
         scripts_folder = os.path.join(mount_point, "scripts")
@@ -61,18 +63,18 @@ async def install_scripts(mount_point):
         print(e)
 
 
-def write_script_hashes(ran_scripts_file, script_hashes):
+def write_script_hashes(ran_scripts_file: str, script_hashes: List[Any]) -> None:
     with open(ran_scripts_file, "w") as file:
         file.writelines(yaml.dump(script_hashes))
 
 
-def start_once_scripts(once_scripts, script_hashes):
+def start_once_scripts(once_scripts: List[str], script_hashes: Any) -> None:
     for script in once_scripts:
         # check hash change
         start_once_script(script, script_hashes)
 
 
-def start_once_script(script, script_hashes):
+def start_once_script(script: str, script_hashes: Any) -> None:
     index = -1
     found_files = [i for i, e in enumerate(script_hashes) if e["file"] == script]
     if len(found_files) == 1:
@@ -99,7 +101,7 @@ def start_once_script(script, script_hashes):
     start_script(script)
 
 
-def get_script_hashes(ran_scripts_file):
+def get_script_hashes(ran_scripts_file: str) -> Any:
     with open(ran_scripts_file, "r") as file:
         script_hashes = yaml.safe_load(file)
         if script_hashes == None:
@@ -107,12 +109,12 @@ def get_script_hashes(ran_scripts_file):
     return script_hashes
 
 
-def start_always_scripts(always_scripts):
+def start_always_scripts(always_scripts: List[str]) -> None:
     for script in always_scripts:
         start_script(script)
 
 
-def start_script(script_name):
+def start_script(script_name: str) -> None:
     global processes
     # FAT filesystems don't have the executable flag, so directly running it won't work, so just start them with bash
     # also start them in the background

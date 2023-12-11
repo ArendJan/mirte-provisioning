@@ -3,6 +3,7 @@ from watchdog.events import FileSystemEventHandler
 import os
 import shutil
 import time
+from asyncio.events import AbstractEventLoop
 
 observer = None
 
@@ -10,7 +11,7 @@ tmx_config_path = "/usr/local/src/mirte/mirte-ros-packages/mirte_telemetrix/conf
 sd_config_path = "/mnt/mirte/robot_config.yaml"
 
 
-def start(mount_point, loop):
+def start(mount_point: str, loop: AbstractEventLoop) -> None:
     global observer, sd_config_path
     sd_config_path = f"{mount_point}/robot_config.yaml"
     if not os.path.isfile(tmx_config_path):
@@ -32,7 +33,7 @@ def start(mount_point, loop):
 last_copy = time.time()
 
 
-def copy_on_modify(src_path):
+def copy_on_modify(src_path: str) -> None:
     global last_copy
     # otherwise it is triggering itself. 1s backoff time
     if time.time() - last_copy < 1:
@@ -45,7 +46,7 @@ def copy_on_modify(src_path):
 
 
 class MyEventHandler(FileSystemEventHandler):
-    def catch_all_handler(self, event):
+    def catch_all_handler(self, event) -> None:
         if event.is_directory:
             return
         copy_on_modify(event.src_path)
@@ -64,12 +65,12 @@ class MyEventHandler(FileSystemEventHandler):
         self.catch_all_handler(event)
 
 
-def stop():
+def stop() -> None:
     observer.stop()
     observer.join()
 
 
-def copy(fr, to):
+def copy(fr: str, to: str) -> None:
     shutil.copy2(fr, to)
 
 

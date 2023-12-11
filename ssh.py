@@ -1,9 +1,10 @@
 import os
+from asyncio.events import AbstractEventLoop
 
 auth_keys_path = "/home/mirte/.ssh/authorized_keys"
 
 
-def start(mount_point, loop):
+def start(mount_point: str, loop: AbstractEventLoop) -> None:
     config_file = f"{mount_point}/authorized_keys"
     if not os.path.isfile(config_file):
         print("No authorized keys configuration")
@@ -21,5 +22,5 @@ def start(mount_point, loop):
         file.writelines(new_keys)
 
 
-def stop():
+def stop() -> None:
     print("stop ssh")

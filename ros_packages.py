@@ -7,19 +7,20 @@ import signal
 import time
 import asyncio
 from urllib.request import urlopen
+from asyncio.events import AbstractEventLoop
+from typing import Any, Dict
+from pathlib import Path
 
-processes = []
 
-
-def start(mount_point, loop):
+def start(mount_point: str, loop: AbstractEventLoop) -> None:
     loop.create_task(install_ros_packages(mount_point))
 
 
-def stop():
+def stop() -> None:
     print("stop ROS packages")
 
 
-async def install_ros_packages(mount_point):
+async def install_ros_packages(mount_point: str) -> None:
     try:
         packages_folder = os.path.join(mount_point, "ros_packages")
         target_ws_folder = get_ws_folder()
@@ -55,12 +56,12 @@ async def install_ros_packages(mount_point):
                 print("symlink err:", e)
         # give the machine_config component time to connect to a nice network!
         await asyncio.sleep(20)
-        rosdep_install(new_packages)
+        rosdep_install()
     except Exception as e:
         print(e)
 
 
-def get_ws_folder():
+def get_ws_folder() -> str:
     ret = subprocess.run(
         f'/bin/bash -c ". /home/mirte/.bashrc && roscd && pwd"',
         # f'/usr/bin/zsh -c ". /home/arendjan/.zshrc && roscd && pwd"',
@@ -71,7 +72,7 @@ def get_ws_folder():
     return os.path.abspath(os.path.join(ret.stdout.decode(), "../src"))
 
 
-def rosdep_install(packages):
+def rosdep_install() -> None:
     if not internet_on():
         return
     ret = subprocess.run(
@@ -82,7 +83,7 @@ def rosdep_install(packages):
     )
 
 
-def internet_on():
+def internet_on() -> bool:
     try:
         urlopen("https://mirte.org/", timeout=2)
         return True
