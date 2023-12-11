@@ -113,8 +113,8 @@ def set_password(new_password, prev_set_password):
     ):  # when changing as the mirte user, there are some checks, when changing as root, no checks
         return
     print(f'Changing password to "{new_password}"')
-    print(f'echo "{new_password}\n{new_password}" | sudo passwd mirte')
-    o = os.system(f'echo "{new_password}\n{new_password}" | sudo passwd mirte')
+    print(f'echo "echo "mirte:{new_password}" | chpasswd')
+    o = os.system(f'echo "mirte:{new_password}" | chpasswd')
     print(o)
 
 
