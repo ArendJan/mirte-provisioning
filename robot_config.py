@@ -21,7 +21,9 @@ def start(mount_point: str, loop: AbstractEventLoop) -> None:
         print("No configuration on extra partition, copying existing to it.")
         copy(tmx_config_path, sd_config_path)
 
-    # Assuming the sd configuration is the 'latest', as it is either copied from tmx/config or it is updated by the user when offline, so always copy the sd config to the user_config
+    # Assuming the sd configuration is the 'latest', as it is either copied
+    # from tmx/config or it is updated by the user when offline, so always
+    # copy the sd config to the user_config
     copy(sd_config_path, tmx_config_path)
     observer = Observer()
     event_handler = MyEventHandler()

@@ -39,7 +39,8 @@ def start(mount_point: str, loop: AbstractEventLoop) -> None:
     store_prev_config(configuration, prev_config_file)
 
 
-def access_points(configuration: Dict[str, Any], loop: AbstractEventLoop) -> None:
+def access_points(configuration: Dict[str, Any],
+                  loop: AbstractEventLoop) -> None:
     print(configuration)
     try:
         for ap in configuration["access_points"]:
@@ -58,7 +59,9 @@ def stop() -> None:
     stopped = True
 
 
-# Nmcli can only connect to a network that is in the air, so we need to continuously check available networks and if not connected, try any known connections
+# Nmcli can only connect to a network that is in the air, so we need to
+# continuously check available networks and if not connected, try any
+# known connections
 async def ap_loop(configuration: Dict[str, Any]) -> None:
     while not stopped:
         await asyncio.sleep(10)
@@ -69,9 +72,8 @@ async def check_ap(configuration: Dict[str, Any]) -> None:
     connections = nmcli.connection()
     wifi_conn = list(
         filter(
-            lambda conn: conn.conn_type == "wifi" and conn.device != "--", connections
-        )
-    )
+            lambda conn: conn.conn_type == "wifi" and conn.device != "--",
+            connections))
     if len(wifi_conn) > 0:
         connection = wifi_conn[0]
         if connection.name != hostname:  # we have a connection to a wifi point
@@ -80,8 +82,9 @@ async def check_ap(configuration: Dict[str, Any]) -> None:
     # No connection or own hotspot
     aps = list(map(lambda ap: ap.ssid, nmcli.device.wifi()))
     existing_known_aps = list(
-        filter(lambda known_ap: known_ap["ssid"] in aps, configuration["access_points"])
-    )
+        filter(
+            lambda known_ap: known_ap["ssid"] in aps,
+            configuration["access_points"]))
     # keep ordering of known aps
     if len(existing_known_aps) > 0:
         ap = existing_known_aps[0]
@@ -106,7 +109,8 @@ def set_hostname(new_hostname: str, curr_set_hostname: str) -> None:
 
 def set_password(new_password: str, prev_set_password: str) -> None:
     if new_password == prev_set_password:
-        # No need to update it and possibly the user edited it already by using the passwd command
+        # No need to update it and possibly the user edited it already by using
+        # the passwd command
         return
     if (
         len(new_password) < 1
@@ -119,7 +123,8 @@ def set_password(new_password: str, prev_set_password: str) -> None:
 
 
 def write_back_configuration(configuration: dict, config_file: str) -> None:
-    # read back in the hostname file, if not set in this run, then the user can know the hostname after a first boot
+    # read back in the hostname file, if not set in this run, then the user
+    # can know the hostname after a first boot
     with open("/etc/hostname", "r") as file:
         current_name = file.readlines()[0].strip()
     # if XXXXX, then network setup did not set the hostname yet
@@ -130,7 +135,8 @@ def write_back_configuration(configuration: dict, config_file: str) -> None:
         file.writelines(config_text)
 
 
-def store_prev_config(configuration: Dict[str, Any], prev_config_file: str) -> None:
+def store_prev_config(
+        configuration: Dict[str, Any], prev_config_file: str) -> None:
     config_text = yaml.dump(configuration)
     with open(prev_config_file, "w") as file:
         file.writelines(config_text)

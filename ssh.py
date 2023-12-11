@@ -16,7 +16,7 @@ def start(mount_point: str, loop: AbstractEventLoop) -> None:
         with open(auth_keys_path) as file:
             existing_keys = file.readlines()
 
-    new_keys = list(filter(lambda key: not key in existing_keys, new_keys))
+    new_keys = list(filter(lambda key: key not in existing_keys, new_keys))
     print("adding:", new_keys)
     with open(auth_keys_path, "a") as file:
         file.writelines(new_keys)

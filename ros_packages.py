@@ -87,5 +87,5 @@ def internet_on() -> bool:
     try:
         urlopen("https://mirte.org/", timeout=2)
         return True
-    except:
+    except BaseException:
         return False
