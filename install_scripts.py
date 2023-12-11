@@ -7,10 +7,10 @@ import time
 from typing import Any, List
 import yaml
 
-from provisioning_module import Provisioning_Module
+from provisioning_module import ProvisioningModule
 
 
-class InstallScripts(Provisioning_Module):
+class InstallScripts(ProvisioningModule):
     def __init__(self)->None:
         self.processes:List[subprocess.Popen] = []
 
